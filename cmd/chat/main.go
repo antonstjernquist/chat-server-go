@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chat/pkg/toxic"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -87,7 +88,7 @@ func (s *ChatServer) run() {
 func (c *Client) closeConnection() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	// Send a proper close frame
 	c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	c.conn.Close()
@@ -209,6 +210,8 @@ func main() {
 	server := newChatServer()
 	go server.run()
 
+	toxicity.One()
+
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(server, w, r)
 	})
@@ -221,4 +224,4 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-} 
+}
